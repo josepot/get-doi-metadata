@@ -1,0 +1,18 @@
+{
+  "name": "get-doi-metadata",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Josep M Sobrepere",
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^7.0.2",
+    "q": "^1.4.1",
+    "ramda": "^0.18.0",
+    "request": "^2.65.0",
+    "urlencode": "^1.1.0"
+  }
+}
