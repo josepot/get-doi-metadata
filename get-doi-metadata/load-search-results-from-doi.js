@@ -1,15 +1,16 @@
 'use strict';
 
-const urlEncode = require('urlencode');
 const R = require('ramda');
-const Q = require('q');
-const getJQueryWindow = require('../utils.js').getJQueryWindow;
+const urlEncode = require('urlencode');
+const utils = require('../utils.js');
+const getJQueryWindow = utils.getJQueryWindow;
+const when = utils.when;
 
 const SEARCH_URL = 'https://scholar.google.com/scholar?hl=en&q=';
 const getResultEntries = (w) => w.$('#gs_ccl > .gs_r');
 
 const loadSearchResultsFromDoi = R.pipeP(
-  Q.when,
+  when,
   urlEncode,
   R.concat(SEARCH_URL),
   getJQueryWindow,

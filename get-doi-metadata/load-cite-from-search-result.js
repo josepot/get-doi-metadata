@@ -1,8 +1,9 @@
 'use strict';
 
 const R = require('ramda');
-const Q = require('q');
-const getJQueryWindow = require('../utils.js').getJQueryWindow;
+const utils = require('../utils.js');
+const getJQueryWindow = utils.getJQueryWindow;
+const when = utils.when;
 
 function getCiteId(searchResult) {
   const citeLinkPath = '> .gs_ri > .gs_fl > a[aria-controls=gs_cit]';
@@ -21,7 +22,7 @@ function getCiteUrl(citeId) {
 }
 
 const loadCiteFromSearchResult = R.pipeP(
-  Q.when,
+  when,
   getCiteId,
   getCiteUrl,
   getJQueryWindow

@@ -1,13 +1,13 @@
 'use strict';
 
-var jsDom = require('jsdom');
-var request = require('request');
-var R = require('ramda');
-var Q = require('q');
+const jsDom = require('jsdom');
+const request = require('request');
+const R = require('ramda');
+const when = Promise.resolve.bind(Promise);
 
 const JQUERY_URL = "http://code.jquery.com/jquery.js";
 
-var isRobotDetected = (body) =>
+const isRobotDetected = (body) =>
   body.indexOf(`This page checks to see if it's really you sending`) > -1;
 
 function getJQueryWindow(url) {
@@ -42,21 +42,23 @@ function getRequest(url) {
   });
 }
 
-function forceDelay(value) {
-  var waitTime = Math.max(400, Math.floor((Math.random() * 3000)));
-  return Q(value).delay(waitTime);
+function forceRandomDelay(value) {
+  const MIN_WAIT = 300;
+  const MAX_WAIT = 2000;
+  const waitTime = Math.max(MIN_WAIT, Math.floor((Math.random() * MAX_WAIT)));
+  return new Promise((res) => setTimeout(() => res(value), waitTime));
 }
 
 function convergeP(convergingFunction, branchFunctions) {
-  return (...args) => Q.all(
+  return (...args) => Promise.all(
     branchFunctions
-    .map((fn) => R.curryN(2, R.pipeP)(Q.when)(fn))
-    .map((fnEntry) => fnEntry(...args))
+    .map((fn) => R.pipeP(when, fn)(...args))
   ).then(convergingFunction);
 }
 
 module.exports = {
-  getJQueryWindow: R.composeP(getJQueryWindow, forceDelay),
-  getRequest: R.composeP(getRequest, forceDelay),
-  convergeP: convergeP
+  getJQueryWindow: R.composeP(getJQueryWindow, forceRandomDelay),
+  getRequest: R.composeP(getRequest, forceRandomDelay),
+  convergeP: convergeP,
+  when: when
 };

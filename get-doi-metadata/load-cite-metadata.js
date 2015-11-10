@@ -1,8 +1,10 @@
 'use strict';
 
 const R = require('ramda');
-const Q = require('q');
-const getRequest = require('../utils.js').getRequest;
+const utils = require('../utils.js');
+const when = utils.when;
+const getRequest = utils.getRequest;
+
 const properties =
   ['title', 'author', 'journal', 'volume', 'number', 'pages', 'year'];
 
@@ -22,7 +24,7 @@ function getMetadataFromBibTeX(bib) {
 }
 
 const loadCiteMetadata = R.pipeP(
-  Q.when,
+  when,
   getBibTexLinkContent,
   R.concat('https://scholar.google.com'),
   getRequest,
