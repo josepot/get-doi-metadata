@@ -2,11 +2,14 @@
 
 var R = require('ramda');
 var readline = require('readline');
-var getDoiMetadata = require('./get-doi-metadata.js');
+var getDoiMetadata = require('./get-doi-metadata/index.js');
 var batchPromiseProcessor = require('./batch-promise-processor.js');
 
 var log = console.log.bind(console);
 
+getDoiMetadata('10.1234/NP5678').then(log, log);
+
+/*
 var rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
@@ -21,3 +24,4 @@ rl.on('line', function(doi){
 rl.on('close', () => {
   batchPromiseProcessor(promises, log, log, 4);
 });
+*/

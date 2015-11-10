@@ -33,7 +33,7 @@ function getRequest(url) {
     request(url, (err, res, body) => {
         if(err) {
           reject(err);
-        } else if(isRobotDetected(body.innerHTML)) {
+        } else if(isRobotDetected(body.innerHTML || body)) {
           reject(new Error('Robot detected'));
         } else {
           resolve(body);
@@ -47,7 +47,16 @@ function forceDelay(value) {
   return Q(value).delay(waitTime);
 }
 
+function convergeP(convergingFunction, branchFunctions) {
+  return (...args) => Q.all(
+    branchFunctions
+    .map((fn) => R.curryN(2, R.pipeP)(Q.when)(fn))
+    .map((fnEntry) => fnEntry(...args))
+  ).then(convergingFunction);
+}
+
 module.exports = {
   getJQueryWindow: R.composeP(getJQueryWindow, forceDelay),
-  getRequest: R.composeP(getRequest, forceDelay)
+  getRequest: R.composeP(getRequest, forceDelay),
+  convergeP: convergeP
 };
