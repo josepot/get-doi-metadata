@@ -26,4 +26,6 @@ const getDoiMetadata = convergeP( R.mergeAll, [
   )
 ]);
 
-module.exports = getDoiMetadata;
+module.exports = (doi) => getDoiMetadata(doi).catch((err) => {
+  throw new Error(`${doi}\tError: ${err.message}`);
+});

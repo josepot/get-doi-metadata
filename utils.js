@@ -43,7 +43,7 @@ function getRequest(url) {
 }
 
 function forceRandomDelay(value) {
-  const MIN_WAIT = 300;
+  const MIN_WAIT = 400;
   const MAX_WAIT = 2000;
   const waitTime = Math.max(MIN_WAIT, Math.floor((Math.random() * MAX_WAIT)));
   return new Promise((res) => setTimeout(() => res(value), waitTime));

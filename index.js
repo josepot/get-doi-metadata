@@ -1,27 +1,36 @@
 'use strict';
 
-var R = require('ramda');
-var readline = require('readline');
-var getDoiMetadata = require('./get-doi-metadata/index.js');
-var batchPromiseProcessor = require('./batch-promise-processor.js');
+const R = require('ramda');
+const readline = require('readline');
+const getDoiMetadata = require('./get-doi-metadata/index.js');
+const batchPromiseProcessor = require('./batch-promise-processor.js');
+const MAX_SIMULTANEOUS_REQUESTS = 4;
 
-var log = console.log.bind(console);
+let promises = [];
 
-getDoiMetadata('10.1234/NP5678').then(log, log);
+const log = console.log.bind(console);
 
-/*
-var rl = readline.createInterface({
+const resultToString = (result) => [
+  'doi', 'nResults', 'year', 'title', 'author',
+  'journal', 'volume', 'number', 'pages'
+]
+.map((prop) => R.prop(prop, result))
+.join('\t');
+
+const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
-
-let promises = [];
 
 rl.on('line', function(doi){
   promises.push(R.partial(getDoiMetadata, [doi]));
 });
 
 rl.on('close', () => {
-  batchPromiseProcessor(promises, log, log, 4);
+  batchPromiseProcessor(
+    promises,
+    R.compose(log, resultToString),
+    R.compose(log, R.prop('message')),
+    MAX_SIMULTANEOUS_REQUESTS
+  );
 });
-*/

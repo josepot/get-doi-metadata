@@ -6,9 +6,8 @@ function batchPromiseProcessor(promises, successFn, errorFn, runningSize) {
     .then(successFn, errorFn)
     .then(() => {
       if(promises.length > 0) processPromise(promises.shift());
-    })
-    .done();
-  }
+    });
+  };
 
   promises.splice(0, runningSize).forEach(processPromise);
 }

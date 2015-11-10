@@ -8,6 +8,7 @@ const when = utils.when;
 function getCiteId(searchResult) {
   const citeLinkPath = '> .gs_ri > .gs_fl > a[aria-controls=gs_cit]';
   const citeIdMatcherRegex = /^return\sgs_ocit\(event,'(.*?)'/;
+
   const citeLinkOnClickAttr = searchResult.find(citeLinkPath).attr('onclick');
   const match = citeIdMatcherRegex.exec(citeLinkOnClickAttr);
   const citeId = match && match[1];
@@ -17,9 +18,8 @@ function getCiteId(searchResult) {
   return citeId;
 }
 
-function getCiteUrl(citeId) {
-  return `https://scholar.google.com/scholar?q=info:${citeId}:scholar.google.com/&output=cite&scirp=0&hl=en`;
-}
+const getCiteUrl = (citeId) => `https://scholar.google.com/scholar?\
+q=info:${citeId}:scholar.google.com/&output=cite&scirp=0&hl=en`;
 
 const loadCiteFromSearchResult = R.pipeP(
   when,
