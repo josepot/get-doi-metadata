@@ -3,19 +3,19 @@
 const jsDom = require('jsdom');
 const request = require('request');
 const R = require('ramda');
+const fs = require('fs');
+const jQuery = fs.readFileSync('node_modules/jquery/dist/jquery.js', 'utf-8');
 const when = Promise.resolve.bind(Promise);
-
-const JQUERY_URL = "http://code.jquery.com/jquery.js";
 
 const isRobotDetected = (body) =>
   body.indexOf(`This page checks to see if it's really you sending`) > -1;
 
 function getJQueryWindow(url) {
   return new Promise(function(resolve, reject) {
-    jsDom.env(
-      url,
-      [JQUERY_URL],
-      (err, window) => {
+    jsDom.env({
+      url: url,
+      src: [jQuery],
+      done: (err, window) => {
         if(err) {
           reject(err);
         } else if(isRobotDetected(window.document.body.innerHTML)) {
@@ -24,7 +24,7 @@ function getJQueryWindow(url) {
           resolve(window);
         }
       }
-    );
+    });
   });
 }
 
