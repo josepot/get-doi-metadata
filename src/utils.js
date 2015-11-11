@@ -52,8 +52,8 @@ function forceRandomDelay(value) {
 function convergeP(convergingFunction, branchFunctions) {
   return (...args) => Promise.all(
     branchFunctions
-    .map((fn) => R.pipeP(when, fn)(...args))
-  ).then(convergingFunction);
+    .map((fn) => when(fn(...args)))
+  ).then((res) => convergingFunction(...res));
 }
 
 module.exports = {

@@ -15,11 +15,11 @@ const getFirstCiteMetadataEntriesFromResults = R.pipeP(
   loadCiteMetadata
 );
 
-const getDoiMetadata = convergeP( R.mergeAll, [
+const getDoiMetadata = convergeP( R.merge, [
   R.objOf('doi'),
   R.pipeP(
     loadSearchResultsFromDoi,
-    convergeP( R.mergeAll, [
+    convergeP( R.merge, [
       R.compose(R.objOf('nResults'), R.prop('length')),
       getFirstCiteMetadataEntriesFromResults
     ])

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --harmony_rest_parameters ./src/index.js",
+    "test": "./node_modules/mocha/bin/mocha --harmony_rest_parameters test"
   },
   "author": "Josep M Sobrepere",
   "license": "MIT",
@@ -13,5 +14,12 @@
     "ramda": "^0.18.0",
     "request": "^2.65.0",
     "urlencode": "^1.1.0"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "chai-as-promised": "^5.1.0",
+    "mocha": "^2.3.3",
+    "q": "^1.4.1",
+    "rewire": "^2.4.0"
   }
 }
