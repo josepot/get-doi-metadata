@@ -6,7 +6,7 @@ const utils = require('../utils.js');
 const getJQueryWindow = utils.getJQueryWindow;
 const when = utils.when;
 
-const SEARCH_URL = 'https://scholar.google.com/scholar?hl=en&q=';
+const SEARCH_URL = '/scholar?hl=en&q=';
 const getResultEntries = (w) => w.$('#gs_ccl > .gs_r');
 
 const loadSearchResultsFromDoi = R.pipeP(

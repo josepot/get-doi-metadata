@@ -1,51 +1,55 @@
 'use strict';
 
 const jsDom = require('jsdom');
-const request = require('request');
+const http = require('http');
 const R = require('ramda');
 const fs = require('fs');
+const config = require('./config.js');
 const jQuery = fs.readFileSync('node_modules/jquery/dist/jquery.js', 'utf-8');
 const when = Promise.resolve.bind(Promise);
 
-const isRobotDetected = (body) =>
-  body.indexOf(`This page checks to see if it's really you sending`) > -1;
+const botDetected =
+  (body) => body.indexOf('your computer or network may be sending automated queries') > -1;
 
-function getJQueryWindow(url) {
-  return new Promise(function(resolve, reject) {
-    jsDom.env({
-      url: url,
-      src: [jQuery],
-      done: (err, window) => {
-        if(err) {
-          reject(err);
-        } else if(isRobotDetected(window.document.body.innerHTML)) {
-          reject(new Error('Robot detected'));
-        } else {
-          resolve(window);
-        }
+const getJQueryWindow = R.pipeP(
+  getRequest,
+  (body) => new Promise((resolve, reject) => jsDom.env({
+    html: body,
+    src: [jQuery],
+    done: (err, window) => {
+      if(err) {
+        reject(err);
+      } else {
+        resolve(window);
       }
-    });
-  });
-}
+    }
+  }))
+);
 
 function getRequest(url) {
   return new Promise((resolve, reject) => {
-    request(url, (err, res, body) => {
-        if(err) {
-          reject(err);
-        } else if(isRobotDetected(body.innerHTML || body)) {
-          reject(new Error('Robot detected'));
-        } else {
+    http.get({
+      host: config.HOST_NAME,
+      path: url,
+      headers: { Host: config.HOST_NAME }
+    }, (response) => {
+      if(response.statusCode === 302)
+        return reject(new Error(config.CITE_ID_ERROR_MESSAGE));
+      let body = '';
+      response.on('data', (d)=> { body += d; });
+      response.on('end', ()=> {
+        botDetected(body) ?
+          reject(new Error(config.CITE_ID_ERROR_MESSAGE)) :
           resolve(body);
-        }
-    });
+      });
+    }).on('error', (e)=> reject(e));
   });
 }
 
 function forceRandomDelay(value) {
   const MIN_WAIT = 400;
   const MAX_WAIT = 2000;
-  const waitTime = Math.max(MIN_WAIT, Math.floor((Math.random() * MAX_WAIT)));
+  const waitTime = MIN_WAIT + Math.floor(Math.random() * (MAX_WAIT - MIN_WAIT));
   return new Promise((res) => setTimeout(() => res(value), waitTime));
 }
 

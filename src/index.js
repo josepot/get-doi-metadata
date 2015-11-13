@@ -4,7 +4,7 @@ const R = require('ramda');
 const readline = require('readline');
 const getDoiMetadata = require('./get-doi-metadata/index.js');
 const batchPromiseProcessor = require('./batch-promise-processor.js');
-const MAX_SIMULTANEOUS_REQUESTS = 4;
+const MAX_SIMULTANEOUS_REQUESTS = 1;
 
 let promises = [];
 

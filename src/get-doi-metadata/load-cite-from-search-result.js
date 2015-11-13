@@ -18,8 +18,7 @@ function getCiteId(searchResult) {
   return citeId;
 }
 
-const getCiteUrl = (citeId) => `https://scholar.google.com/scholar?\
-q=info:${citeId}:scholar.google.com/&output=cite&scirp=0&hl=en`;
+const getCiteUrl = (citeId) => `/scholar?q=info:${citeId}:scholar.google.com/&output=cite&scirp=0&hl=en`;
 
 const loadCiteFromSearchResult = R.pipeP(
   when,

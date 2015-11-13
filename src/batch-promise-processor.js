@@ -1,11 +1,20 @@
 'use strict';
 
+const ROBOT_ERROR_MESSAGE = require('./config.js').ROBOT_ERROR_MESSAGE;
+
 function batchPromiseProcessor(promises, successFn, errorFn, runningSize) {
-  var processPromise = (promise) => {
+  let botDetected = false;
+  const processPromise = (promise) => {
     promise()
-    .then(successFn, errorFn)
+    .then(
+      successFn,
+      (err) => {
+        botDetected = err.message.indexOf(ROBOT_ERROR_MESSAGE) > -1;
+        errorFn(err);
+      }
+    )
     .then(() => {
-      if(promises.length > 0) processPromise(promises.shift());
+      if(promises.length > 0 && !botDetected) processPromise(promises.shift());
     });
   };
 

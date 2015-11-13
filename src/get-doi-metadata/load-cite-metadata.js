@@ -26,7 +26,6 @@ function getMetadataFromBibTeX(bib) {
 const loadCiteMetadata = R.pipeP(
   when,
   getBibTexLinkContent,
-  R.concat('https://scholar.google.com'),
   getRequest,
   getMetadataFromBibTeX
 );
