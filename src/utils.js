@@ -2,14 +2,18 @@
 
 const jsDom = require('jsdom');
 const http = require('http');
+const request = require('request');
+const Agent = require('socks5-http-client/lib/Agent');
 const R = require('ramda');
 const fs = require('fs');
 const config = require('./config.js');
 const jQuery = fs.readFileSync('node_modules/jquery/dist/jquery.js', 'utf-8');
 const when = Promise.resolve.bind(Promise);
+const ProxyManager = require('./proxy-manager.js');
+const logger = require('./logger.js');
 
 const botDetected =
-  (body) => body.indexOf('your computer or network may be sending automated queries') > -1;
+  (body) => config.botMessages.some((x) => body.indexOf(x) > -1);
 
 const getJQueryWindow = R.pipeP(
   getRequest,
@@ -26,29 +30,88 @@ const getJQueryWindow = R.pipeP(
   }))
 );
 
-function getRequest(url) {
+function httpProxyRequest(url, proxy) {
   return new Promise((resolve, reject) => {
-    http.get({
-      host: config.HOST_NAME,
+    var request = http.get({
+      host: proxy.ip,
+      port: proxy.port,
       path: url,
       headers: { Host: config.HOST_NAME }
     }, (response) => {
-      if(response.statusCode === 302)
-        return reject(new Error(config.CITE_ID_ERROR_MESSAGE));
+      if(response.statusCode !== 200) {
+        return reject(new Error('Status Code:' + response.statusCode));
+      }
       let body = '';
       response.on('data', (d)=> { body += d; });
       response.on('end', ()=> {
-        botDetected(body) ?
-          reject(new Error(config.CITE_ID_ERROR_MESSAGE)) :
+        if(botDetected(body)) {
+          reject(new Error(confg.ROBOT_ERROR_MESSAGE));
+        } else {
           resolve(body);
+        }
       });
-    }).on('error', (e)=> reject(e));
+    });
+    request.on('socket', function (socket) {
+      socket.setTimeout(6000);
+      socket.on('timeout', function() {
+        request.abort();
+      });
+    });
+    request.on('error', (e)=> { reject(e); });
+  }).then(
+    (body) => {
+      logger.info('Url resolved', { url: url });
+      ProxyManager.returnProxy(proxy, true);
+      return body;
+    },
+    (err) => {
+      logger.error('Url failed to resolve', { url: url, err: err.message });
+      ProxyManager.returnProxy(proxy, false);
+      return getRequest(url);
+    }
+  );
+}
+
+function socksRequest(url, proxy) {
+  return new Promise((resolve, reject) => {
+    request({
+      url: `http://scholar.google.com${url}`,
+      agentClass: Agent,
+      agentOptions: {
+        socksHost: proxy.ip,
+        socksPort: proxy.port
+      }
+    }, function(err, res) {
+      if(err) return reject(err);
+      return botDetected(res.body) ?
+        reject(new Error(config.ROBOT_ERROR_MESSAGE)) :
+        resolve(res.body);
+    });
+  }).then(
+    (body) => {
+      ProxyManager.returnProxy(proxy, true);
+      return body;
+    },
+    (err) => {
+      ProxyManager.returnProxy(proxy, false);
+      return getRequest(url);
+    }
+  );
+}
+
+function getRequest(url) {
+  return ProxyManager.getProxy().then((proxy) => {
+    const requester = proxy.type == 'HTTP' ?
+      httpProxyRequest :
+      socksRequest;
+
+    return requester(url, proxy);
   });
 }
 
 function forceRandomDelay(value) {
   const MIN_WAIT = 400;
-  const MAX_WAIT = 2000;
+  const MAX_WAIT = 1000;
   const waitTime = MIN_WAIT + Math.floor(Math.random() * (MAX_WAIT - MIN_WAIT));
   return new Promise((res) => setTimeout(() => res(value), waitTime));
 }

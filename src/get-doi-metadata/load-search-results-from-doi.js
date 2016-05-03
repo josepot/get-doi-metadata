@@ -7,14 +7,12 @@ const getJQueryWindow = utils.getJQueryWindow;
 const when = utils.when;
 
 const SEARCH_URL = '/scholar?hl=en&q=';
-const getResultEntries = (w) => w.$('#gs_ccl > .gs_r');
 
 const loadSearchResultsFromDoi = R.pipeP(
   when,
   urlEncode,
   R.concat(SEARCH_URL),
-  getJQueryWindow,
-  getResultEntries
+  getJQueryWindow
 );
 
 module.exports = loadSearchResultsFromDoi;
